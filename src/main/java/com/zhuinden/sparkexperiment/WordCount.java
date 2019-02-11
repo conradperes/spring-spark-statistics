@@ -77,8 +77,8 @@ public class WordCount {
         RDD<String> lines = sc.textFile(HADOOP_URI + FILE_NAME, 3 * sc.defaultParallelism()).cache();
         long count = lines.count();
         JavaRDD<Row> rowRDD = lines.toJavaRDD().map(RowFactory::create);
-        List<StructField> fields = Arrays.asList(
-                DataTypes.createStructField("line", DataTypes.StringType, true));
+        //List<StructField> fields = Arrays.asList(
+        //        DataTypes.createStructField("line", DataTypes.StringType, true));
         StructType schema =
          DataTypes.createStructType(new StructField[] {
                 DataTypes.createStructField("url",  DataTypes.StringType, true),
@@ -89,7 +89,7 @@ public class WordCount {
         });
         SQLContext sqlContext = new SQLContext(sc);
         Dataset<Row> df = sqlContext.createDataFrame(rowRDD, schema);
-        return df.filter(col("line").endsWith("404 -"));
+        return df.filter(col("httpcode").endsWith("404 -"));
     }
 
 //    public List<Count> count404GroupedByDay() {
