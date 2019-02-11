@@ -161,7 +161,7 @@ public class WordCount {
         return rows.stream().map(new Function<Row, Count>() {
             @Override
             public Count apply(Row row) {
-                return new Count(row.getString(0), row.getLong(1));
+                return new Count();
             }
         }).collect(toList());
     }
