@@ -107,9 +107,9 @@ public class WordCount {
         // Counts all the errors
         errors.count();
         // Counts errors mentioning MySQL
-        errors.filter(col("line").like("%MySQL%")).count();
+        errors.filter(col("httpcode").like("%MySQL%")).count();
         // Fetches the MySQL errors as an array of strings
-        errors.filter(col("line").like("%MySQL%")).collect();
+        errors.filter(col("httpcode").like("%MySQL%")).collect();
 
         RelationalGroupedDataset groupedDataset = errors.groupBy(col("data"));
         System.out.println("####################" +
