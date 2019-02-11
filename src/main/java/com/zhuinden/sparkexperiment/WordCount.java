@@ -60,7 +60,7 @@ public class WordCount {
     }
 
 
-    public List<Count> count404() {
+    public int count404() {
 //        //String input = "hello world hello hello hello";
 //        String[] _words = input.split("404");
 //        List<Word> words = Arrays.stream(_words).map(Word::new).collect(Collectors.toList());
@@ -110,15 +110,7 @@ public class WordCount {
         errors.filter(col("line").like("%MySQL%")).count();
 // Fetches the MySQL errors as an array of strings
         errors.filter(col("line").like("%MySQL%")).collect();
-        RelationalGroupedDataset groupedDataset = errors.groupBy(col("word"));
-        groupedDataset.count().show();
-        List<Row> rows = groupedDataset.count().collectAsList();//JavaConversions.asScalaBuffer(words)).count();
-        return rows.stream().map(new Function<Row, Count>() {
-            @Override
-            public Count apply(Row row) {
-                return new Count(row.getString(0), row.getLong(1));
-            }
-        }).collect(Collectors.toList());
+        return (int) errors.count();
     }
 
 

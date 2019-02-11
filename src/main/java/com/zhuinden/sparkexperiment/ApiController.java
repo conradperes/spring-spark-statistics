@@ -25,7 +25,7 @@ public class ApiController {
 
 
     @RequestMapping("wordcount404")
-    public ResponseEntity<List<Count>> count404() {
+    public ResponseEntity<Integer> count404() {
 
         return new ResponseEntity<>(wordCount.count404(), HttpStatus.OK);
 
