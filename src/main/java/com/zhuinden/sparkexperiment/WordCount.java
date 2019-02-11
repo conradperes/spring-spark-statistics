@@ -26,7 +26,7 @@ public class WordCount {
     @Autowired
     private SparkSession sparkSession;
 
-    private static final String HADOOP_URI= "hdfs://10.211.55.3:9000";
+    private static final String HADOOP_URI= "hdfs://localhost:9000";
     private static final String FILE_NAME ="/input/access_log_Aug95";
 //    static String input;
 //    static{
