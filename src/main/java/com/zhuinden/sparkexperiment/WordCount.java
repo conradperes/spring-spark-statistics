@@ -103,7 +103,7 @@ public class WordCount {
         SQLContext sqlContext = new SQLContext(sc);
         Dataset<Row> df = sqlContext.createDataFrame(rowRDD, schema);
 
-        Dataset errors = df.filter(col("line").contains("404"));
+        Dataset errors = df.filter(col("line").endsWith("404 -"));
         // Counts all the errors
         errors.count();
         // Counts errors mentioning MySQL
