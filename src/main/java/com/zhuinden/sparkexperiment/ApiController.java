@@ -6,7 +6,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -27,11 +26,8 @@ public class ApiController {
 
     @RequestMapping("wordcount404")
     public ResponseEntity<List<Count>> count404() {
-        try {
-            return new ResponseEntity<>(wordCount.count404(), HttpStatus.OK);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return null;
+
+        return new ResponseEntity<>(wordCount.count404(), HttpStatus.OK);
+
     }
 }
