@@ -89,10 +89,17 @@ public class WordCount {
         JavaRDD<Row> rowRDD = lines.toJavaRDD().map(RowFactory::create);
         List<StructField> fields = Arrays.asList(
                 DataTypes.createStructField("line",  DataTypes.StringType, true));
-        StructType schema = DataTypes.createStructType(fields);
+        //StructType schema = DataTypes.createStructType(fields);
         SQLContext sqlContext = new SQLContext(sc);
+        StructType schema = DataTypes.createStructType(new StructField[] {
+                DataTypes.createStructField("url",  DataTypes.StringType, true),
+                DataTypes.createStructField("data", DataTypes.TimestampType, true),
+                DataTypes.createStructField("chamada", DataTypes.StringType, true),
+                DataTypes.createStructField("httpcode", DataTypes.IntegerType, true),
+                DataTypes.createStructField("qtde", DataTypes.IntegerType, true)
+        });
         Dataset<Row> df = sqlContext.createDataFrame(rowRDD, schema);
-        Dataset errors = df.filter(col("line").endsWith("404 -").contains("[]"));
+        Dataset errors = df.filter(col("httpcode").endsWith("404 -"));
         // Counts all the errors
         errors.count();
         // Counts errors mentioning MySQL
@@ -100,7 +107,7 @@ public class WordCount {
         // Fetches the MySQL errors as an array of strings
         errors.filter(col("line").like("%MySQL%")).collect();
 
-        RelationalGroupedDataset groupedDataset = errors.groupBy(col("word"));
+        RelationalGroupedDataset groupedDataset = errors.groupBy(col("data"));
         groupedDataset.count().show();
         List<Row> rows = groupedDataset.count().collectAsList();//JavaConversions.asScalaBuffer(words)).count();
         return rows.stream().map(new Function<Row, Count>() {
