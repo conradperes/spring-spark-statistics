@@ -61,48 +61,16 @@ public class WordCount {
 
 
     public int count404() {
-//        //String input = "hello world hello hello hello";
-//        String[] _words = input.split("404");
-//        List<Word> words = Arrays.stream(_words).map(Word::new).collect(Collectors.toList());
-//        Dataset<Row> dataFrame = sparkSession.createDataFrame(words, Word.class);
-//        dataFrame.show();
-//        //StructType structType = dataFrame.schema();
-//
-//        RelationalGroupedDataset groupedDataset = dataFrame.groupBy(col("word"));
-//        groupedDataset.count().show();
-//        List<Row> rows = groupedDataset.count().collectAsList();//JavaConversions.asScalaBuffer(words)).count();
-//        return rows.stream().map(new Function<Row, Count>() {
-//            @Override
-//            public Count apply(Row row) {
-//                return new Count(row.getString(0), row.getLong(1));
-//            }
-//        }).collect(Collectors.toList());
         int partitionCount = 100;
         SparkContext sc = sparkSession.sparkContext();
         RDD<String> lines = sc.textFile(HADOOP_URI + FILE_NAME, 3 * sc.defaultParallelism()).cache();
         long count = lines.count();
         JavaRDD<Row> rowRDD = lines.toJavaRDD().map(RowFactory::create);
-//        JavaPairRDD<String, String> skillCompanyRdd = lines.toJavaRDD()
-//                .mapToPair(line -> {
-//                    String[] parts = line.split("\t");
-//                    return new Tuple2<>(parts[0] + "\t" + parts[1], 1);
-//                })
-//                .reduceByKey((a, b) -> a + b)
-//                .map(Tuple2::_1)
-//                .mapToPair(line -> {
-//                    String[] parts = line.split("\t");
-//                    return new Tuple2<>(parts[0],parts[1]);
-//                }).coalesce(partitionCount).cache();
-//
-//        count = skillCompanyRdd.count();
-
-        //lines.unpersist();
         List<StructField> fields = Arrays.asList(
                 DataTypes.createStructField("line", DataTypes.StringType, true));
         StructType schema = DataTypes.createStructType(fields);
         SQLContext sqlContext = new SQLContext(sc);
         Dataset<Row> df = sqlContext.createDataFrame(rowRDD, schema);
-
         Dataset errors = df.filter(col("line").endsWith("404 -"));
         // Counts all the errors
         errors.count();
@@ -111,6 +79,37 @@ public class WordCount {
         // Fetches the MySQL errors as an array of strings
         errors.filter(col("line").like("%MySQL%")).collect();
         return (int) errors.count();
+    }
+
+    public List<Count> count404GroupedByDay() {
+        int partitionCount = 100;
+        SparkContext sc = sparkSession.sparkContext();
+        RDD<String> lines = sc.textFile(HADOOP_URI + FILE_NAME, 3 * sc.defaultParallelism()).cache();
+        long count = lines.count();
+        JavaRDD<Row> rowRDD = lines.toJavaRDD().map(RowFactory::create);
+        List<StructField> fields = Arrays.asList(
+                DataTypes.createStructField("line", DataTypes.StringType, true));
+        StructType schema = DataTypes.createStructType(fields);
+        SQLContext sqlContext = new SQLContext(sc);
+        Dataset<Row> df = sqlContext.createDataFrame(rowRDD, schema);
+        Dataset errors = df.filter(col("line").endsWith("404 -").contains("[]"));
+        // Counts all the errors
+        errors.count();
+        // Counts errors mentioning MySQL
+        errors.filter(col("line").like("%MySQL%")).count();
+        // Fetches the MySQL errors as an array of strings
+        errors.filter(col("line").like("%MySQL%")).collect();
+
+        RelationalGroupedDataset groupedDataset = errors.groupBy(col("data"));
+        groupedDataset.count().show();
+        List<Row> rows = groupedDataset.count().collectAsList();//JavaConversions.asScalaBuffer(words)).count();
+        return rows.stream().map(new Function<Row, Count>() {
+            @Override
+            public Count apply(Row row) {
+                return new Count(row.getString(0), row.getLong(1));
+            }
+        }).collect(Collectors.toList());
+
     }
 
 
