@@ -34,6 +34,6 @@ public class ApiController {
 
     @RequestMapping("404groupby")
     public ResponseEntity<List<Count>> count404GroupedByDate() {
-        return new ResponseEntity<>(wordCount.groupBy(), HttpStatus.OK);
+        return new ResponseEntity<>(wordCount.count404GroupedByDay(), HttpStatus.OK);
     }
 }

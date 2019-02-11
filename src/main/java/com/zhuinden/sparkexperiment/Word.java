@@ -6,6 +6,42 @@ import java.util.Date;
 public class Word {
     private String word;
     private Date data;
+    private String httpcode;
+    private String chamada;
+    private String url;
+    private long qtde;
+
+    public String getHttpcode() {
+        return httpcode;
+    }
+
+    public void setHttpcode(String httpcode) {
+        this.httpcode = httpcode;
+    }
+
+    public String getChamada() {
+        return chamada;
+    }
+
+    public void setChamada(String chamada) {
+        this.chamada = chamada;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public long getQtde() {
+        return qtde;
+    }
+
+    public void setQtde(long qtde) {
+        this.qtde = qtde;
+    }
 
     public Word() {
     }

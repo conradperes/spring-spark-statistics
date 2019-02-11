@@ -14,8 +14,8 @@ import org.springframework.stereotype.Component;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
 import static org.apache.spark.sql.functions.col;
 /**
  * Created by achat1 on 9/23/15.
@@ -43,7 +43,7 @@ public class WordCount {
     public List<Count> count() {
         String input = "hello world hello hello hello";
         String[] _words = input.split(" ");
-        List<Word> words = Arrays.stream(_words).map(Word::new).collect(Collectors.toList());
+        List<Word> words = Arrays.stream(_words).map(Word::new).collect(toList());
         Dataset<Row> dataFrame = sparkSession.createDataFrame(words, Word.class);
         dataFrame.show();
         //StructType structType = dataFrame.schema();
@@ -56,7 +56,7 @@ public class WordCount {
             public Count apply(Row row) {
                 return new Count(row.getString(0), row.getLong(1));
             }
-        }).collect(Collectors.toList());
+        }).collect(toList());
     }
 
 
@@ -90,7 +90,7 @@ public class WordCount {
         SparkContext sc = sparkSession.sparkContext();
         RDD<String> lines = sc.textFile(HADOOP_URI + FILE_NAME, 3 * sc.defaultParallelism()).cache();
         long count = lines.count();
-        JavaRDD<Row> rowRDD = lines.toJavaRDD().map(RowFactory::create);
+        List<Word>words  = (List<Word>) lines.toJavaRDD().map(Word::new);
         List<StructField> fields = Arrays.asList(
                 DataTypes.createStructField("line",  DataTypes.StringType, true));
         //StructType schema = DataTypes.createStructType(fields);
@@ -102,7 +102,7 @@ public class WordCount {
                 DataTypes.createStructField("httpcode", DataTypes.IntegerType, true),
                 DataTypes.createStructField("qtde", DataTypes.IntegerType, true)
         });
-        Dataset<Row> df = sqlContext.createDataFrame(rowRDD, schema);
+        Dataset<Row> df = sqlContext.createDataFrame(words, Word.class);
         Dataset errors = df.filter(col("httpcode").endsWith("404 -"));
         // Counts all the errors
         errors.count();
@@ -122,7 +122,7 @@ public class WordCount {
             public Count apply(Row row) {
                 return new Count(row.getString(0), row.getLong(1));
             }
-        }).collect(Collectors.toList());
+        }).collect(toList());
 
     }
 
@@ -132,7 +132,7 @@ public class WordCount {
     public List<Count> groupBy() {
         //        String input = "hello world hello hello hello";
         Dataset errors = getDataset(HADOOP_URI , FILE_NAME);
-
+        //List<Word>words = errors.collectAsList().stream().map(Word::new).collect(toList());
 
         RelationalGroupedDataset groupedDataset = errors.groupBy(col("word"));
         groupedDataset.count().show();
@@ -142,7 +142,7 @@ public class WordCount {
             public Count apply(Row row) {
                 return new Count(row.getString(0), row.getLong(1));
             }
-        }).collect(Collectors.toList());
+        }).collect(toList());
     }
 
 
