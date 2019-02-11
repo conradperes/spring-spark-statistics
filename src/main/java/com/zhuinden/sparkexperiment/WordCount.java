@@ -90,9 +90,9 @@ public class WordCount {
         SparkContext sc = sparkSession.sparkContext();
         RDD<String> lines = sc.textFile(HADOOP_URI + FILE_NAME, 3 * sc.defaultParallelism()).cache();
         long count = lines.count();
-        List<Word>words  = (List<Word>) lines.toJavaRDD().map(Word::new);
-        List<StructField> fields = Arrays.asList(
-                DataTypes.createStructField("line",  DataTypes.StringType, true));
+        //List<Word>words  = (List<Word>) lines.toJavaRDD().map(Word::new);
+        //List<StructField> fields = Arrays.asList(
+        //        DataTypes.createStructField("line",  DataTypes.StringType, true));
         //StructType schema = DataTypes.createStructType(fields);
         SQLContext sqlContext = new SQLContext(sc);
         StructType schema = DataTypes.createStructType(new StructField[] {
@@ -102,7 +102,7 @@ public class WordCount {
                 DataTypes.createStructField("httpcode", DataTypes.IntegerType, true),
                 DataTypes.createStructField("qtde", DataTypes.IntegerType, true)
         });
-        Dataset<Row> df = sqlContext.createDataFrame(words, Word.class);
+        Dataset<Row> df = sqlContext.createDataFrame(lines, Word.class);
         Dataset errors = df.filter(col("httpcode").endsWith("404 -"));
         // Counts all the errors
         errors.count();
