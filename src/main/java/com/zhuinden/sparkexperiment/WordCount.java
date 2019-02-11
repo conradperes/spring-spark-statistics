@@ -61,6 +61,17 @@ public class WordCount {
 
 
     public int count404() {
+        Dataset errors = getDataset(HADOOP_URI , FILE_NAME);
+        // Counts all the errors
+        errors.count();
+        // Counts errors mentioning MySQL
+        errors.filter(col("line").like("%MySQL%")).count();
+        // Fetches the MySQL errors as an array of strings
+        errors.filter(col("line").like("%MySQL%")).collect();
+        return (int) errors.count();
+    }
+
+    private Dataset getDataset(String hadoopUri, String fileName) {
         int partitionCount = 100;
         SparkContext sc = sparkSession.sparkContext();
         RDD<String> lines = sc.textFile(HADOOP_URI + FILE_NAME, 3 * sc.defaultParallelism()).cache();
@@ -71,14 +82,7 @@ public class WordCount {
         StructType schema = DataTypes.createStructType(fields);
         SQLContext sqlContext = new SQLContext(sc);
         Dataset<Row> df = sqlContext.createDataFrame(rowRDD, schema);
-        Dataset errors = df.filter(col("line").endsWith("404 -"));
-        // Counts all the errors
-        errors.count();
-        // Counts errors mentioning MySQL
-        errors.filter(col("line").like("%MySQL%")).count();
-        // Fetches the MySQL errors as an array of strings
-        errors.filter(col("line").like("%MySQL%")).collect();
-        return (int) errors.count();
+        return df.filter(col("line").endsWith("404 -"));
     }
 
     public List<Count> count404GroupedByDay() {
@@ -122,6 +126,24 @@ public class WordCount {
 
     }
 
+
+
+
+    public List<Count> groupBy() {
+        //        String input = "hello world hello hello hello";
+        Dataset errors = getDataset(HADOOP_URI , FILE_NAME);
+
+
+        RelationalGroupedDataset groupedDataset = errors.groupBy(col("word"));
+        groupedDataset.count().show();
+        List<Row> rows = groupedDataset.count().collectAsList();//JavaConversions.asScalaBuffer(words)).count();
+        return rows.stream().map(new Function<Row, Count>() {
+            @Override
+            public Count apply(Row row) {
+                return new Count(row.getString(0), row.getLong(1));
+            }
+        }).collect(Collectors.toList());
+    }
 
 
 }
