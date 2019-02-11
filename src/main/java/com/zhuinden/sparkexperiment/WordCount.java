@@ -116,7 +116,7 @@ public class WordCount {
         return rows.stream().map(new Function<Row, Count>() {
             @Override
             public Count apply(Row row) {
-                return new Count(row.getString(0), row.getLong(2), row.getDate(1));
+                return new Count(row.getString(0), row.getLong(1));
             }
         }).collect(Collectors.toList());
 
