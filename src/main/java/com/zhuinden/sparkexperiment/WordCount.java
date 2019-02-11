@@ -108,12 +108,15 @@ public class WordCount {
         errors.filter(col("line").like("%MySQL%")).collect();
 
         RelationalGroupedDataset groupedDataset = errors.groupBy(col("data"));
+        System.out.println("####################" +
+                "Total de 404 agrupados por data:"+groupedDataset.count()
+        +"####################");
         groupedDataset.count().show();
         List<Row> rows = groupedDataset.count().collectAsList();//JavaConversions.asScalaBuffer(words)).count();
         return rows.stream().map(new Function<Row, Count>() {
             @Override
             public Count apply(Row row) {
-                return new Count(row.getString(3), row.getLong(1), row.getDate(2));
+                return new Count(row.getString(0), row.getLong(2), row.getDate(1));
             }
         }).collect(Collectors.toList());
 
