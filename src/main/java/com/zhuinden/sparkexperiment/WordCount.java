@@ -88,7 +88,7 @@ public class WordCount {
         long count = lines.count();
         JavaRDD<Row> rowRDD = lines.toJavaRDD().map(RowFactory::create);
         List<StructField> fields = Arrays.asList(
-                DataTypes.createStructField("line", DataTypes.StringType, true));
+                DataTypes.createStructField("line",  DataTypes.StringType, true));
         StructType schema = DataTypes.createStructType(fields);
         SQLContext sqlContext = new SQLContext(sc);
         Dataset<Row> df = sqlContext.createDataFrame(rowRDD, schema);
@@ -100,13 +100,13 @@ public class WordCount {
         // Fetches the MySQL errors as an array of strings
         errors.filter(col("line").like("%MySQL%")).collect();
 
-        RelationalGroupedDataset groupedDataset = errors.groupBy(col("data"));
+        RelationalGroupedDataset groupedDataset = errors.groupBy(col("word"));
         groupedDataset.count().show();
         List<Row> rows = groupedDataset.count().collectAsList();//JavaConversions.asScalaBuffer(words)).count();
         return rows.stream().map(new Function<Row, Count>() {
             @Override
             public Count apply(Row row) {
-                return new Count(row.getString(0), row.getLong(1));
+                return new Count(row.getString(3), row.getLong(1), row.getDate(2));
             }
         }).collect(Collectors.toList());
 
